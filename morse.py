@@ -44,16 +44,118 @@ MORSE_CODE = {
 }
 
 
+def find_shortest_substring(bits):
+    """Return the length of the shortest substring of either 1's or 0's"""
+
+    bits = [bit for bit in bits]
+    counter_string = []
+    substring = []
+    while len(bits) > 0:
+
+        while len(bits) >= 1 and bits[0] == "1":
+            substring.append(bits[0])
+            bits.pop(0)
+        if len(substring) > 0:
+            counter_string.append(len(substring))
+            substring = []
+
+        while len(bits) >= 1 and bits[0] == "0":
+            substring.append(bits[0])
+            bits.pop(0)
+        if len(substring) > 0:
+            counter_string.append(len(substring))
+            substring = []
+
+    return min(counter_string)
+
+
 def find_mult(bits):
-    """Finds least amount of occurrences of 0 or 1"""
-    raise NotImplementedError("Please implement this")
+    """Determines the time multiplier that is setting the
+    length of strings of 1's and 0's in bits"""
+
+    bits = bits.strip()
+    bits = trim_extra_zeros(bits)
+    multiplier = find_shortest_substring(bits)
+    return multiplier
+
+
+def reduce_with_multiplier(bits):
+    time_multiplier = find_mult(bits)
+    message = ""
+    for bit in range(0, len(bits), time_multiplier):
+        message += bits[bit]
+    return message
 
 
 def decodeBits(bits):
-    """Translate a string of 1's & 0's to dots and dashes"""
-    raise NotImplementedError("Please implement this")
+    """Translate a message string of 1s & 0s to .'s' and -'s"""
+
+    message = reduce_with_multiplier(bits)
+    word_list = message.split("0000000")
+    word_list = translate_words(word_list)
+    message = message.replace(message, "   ".join(word_list))
+
+    return message
+
+
+def translate_words(word_list):
+    """Translate words of 1's and 0's into a string of .'s and -'s """
+
+    for word in range(0, len(word_list)):
+        letter_list = word_list[word].split("000")
+        letter_list = translate_letters(letter_list)
+        word_list[word] = word_list[word].replace(
+            word_list[word], " ".join(letter_list))
+    return word_list
+
+
+def translate_letters(letter_list):
+    """Translate letters of 1's and 0's into a string of .'s and -'s"""
+
+    for letter in range(len(letter_list)):
+        character_list = letter_list[letter].split("0")
+        character_list = translate_characters(character_list)
+        letter_list[letter] = letter_list[letter].replace(
+            letter_list[letter], "".join(character_list))
+    return letter_list
+
+
+def translate_characters(character_list):
+    """Translate short substrings of 1's into .'s and -'s"""
+
+    for char in range(len(character_list)):
+
+        if character_list[char] == "111":
+            character_list[char] = character_list[char].replace(
+                "111", "-")
+        elif character_list[char] == "1":
+            character_list[char] = character_list[char].replace(
+                "1", ".")
+    return character_list
+
+
+def trim_extra_zeros(message):
+    """Removes leading and trailing 0's from the message"""
+
+    while message[0] == "0":
+        message = message[1:]
+    while message[-1] == "0":
+        message = message[:-1]
+
+    return message
 
 
 def decodeMorse(morse_code):
-    """Translates a string of dots and dashes to human readable text"""
-    raise NotImplementedError("Please implement this")
+    """ Translate a string of dots and dashes into letters """
+
+    result = ""
+    morse_code = morse_code.split("   ")
+
+    for word in morse_code:
+        letters = word.strip().split(" ")
+        word = [list(map(lambda letter:MORSE_CODE.get(letter, ""), letters))]
+        word = "".join(word[0])
+        word = "".join(word)
+        result += word + " "
+
+    return result.strip()
