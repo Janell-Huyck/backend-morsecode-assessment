@@ -7,9 +7,11 @@ from morse import decodeMorse, decodeBits
 
 class TestMorseA(unittest.TestCase):
     """This class only tests the decodeMorse function"""
+
     def test_hey_jude(self):
         """Basic HEY JUDE"""
-        self.assertEqual(decodeMorse('.... . -.--   .--- ..- -.. .'), 'HEY JUDE')
+        self.assertEqual(decodeMorse(
+            '.... . -.--   .--- ..- -.. .'), 'HEY JUDE')
 
     def test_basic_decoding(self):
         """Basic Morse decoding"""
