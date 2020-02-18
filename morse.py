@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+
+import sys
+if sys.version_info[0] >= 3:
+    raise Exception("This program requires python2 interpreter")
+
 """
 Morse code decoder
 
@@ -47,50 +53,31 @@ MORSE_CODE = {
 def find_shortest_substring(bits):
     """Return the length of the shortest substring of either 1's or 0's"""
 
-    bits = [bit for bit in bits]
-    counter_string = []
-    substring = []
-    while len(bits) > 0:
+    min_ones = 100000000
+    min_zeros = 100000000
 
-        while len(bits) >= 1 and bits[0] == "1":
-            substring.append(bits[0])
-            bits.pop(0)
-        if len(substring) > 0:
-            counter_string.append(len(substring))
-            substring = []
+    ones_lengths = [len(substring)
+                    for substring in bits.split("0") if substring]
+    zeros_lengths = [len(substring)
+                     for substring in bits.split("1") if substring]
 
-        while len(bits) >= 1 and bits[0] == "0":
-            substring.append(bits[0])
-            bits.pop(0)
-        if len(substring) > 0:
-            counter_string.append(len(substring))
-            substring = []
+    if ones_lengths:
+        min_ones = min(ones_lengths)
 
-    return min(counter_string)
+    if zeros_lengths:
+        min_zeros = min(zeros_lengths)
 
-
-def find_mult(bits):
-    """Determines the time multiplier that is setting the
-    length of strings of 1's and 0's in bits"""
-
-    bits = bits.strip()
-    bits = trim_extra_zeros(bits)
-    multiplier = find_shortest_substring(bits)
-    return multiplier
-
-
-def reduce_with_multiplier(bits):
-    time_multiplier = find_mult(bits)
-    message = ""
-    for bit in range(0, len(bits), time_multiplier):
-        message += bits[bit]
-    return message
+    return min(min_ones, min_zeros)
 
 
 def decodeBits(bits):
     """Translate a message string of 1s & 0s to .'s' and -'s"""
 
-    message = reduce_with_multiplier(bits)
+    bits = bits.strip("0")
+    time_multiplier = find_shortest_substring(bits)
+
+    message = bits[::time_multiplier]
+
     word_list = message.split("0000000")
     word_list = translate_words(word_list)
     message = message.replace(message, "   ".join(word_list))
@@ -132,17 +119,6 @@ def translate_characters(character_list):
             character_list[char] = character_list[char].replace(
                 "1", ".")
     return character_list
-
-
-def trim_extra_zeros(message):
-    """Removes leading and trailing 0's from the message"""
-
-    while message[0] == "0":
-        message = message[1:]
-    while message[-1] == "0":
-        message = message[:-1]
-
-    return message
 
 
 def decodeMorse(morse_code):
